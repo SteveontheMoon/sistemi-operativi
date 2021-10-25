@@ -1,20 +1,24 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <stdlib.h>
-main() {
+
+/* Simulazione shell, premere CTRL+C per terminare l'eseguzione.*/
+
+int main(){
    int esito;
    char comando[128];
-   while(1) {    
+
+   while(1){
            printf("myshell# ");
-           scanf("%s", comando); //lettura rudimentale: niente argomenti separati
+           scanf("%s", comando); /*lettura rudimentale: niente argomenti separati*/
 			      
            if ((esito=fork()) < 0)
-	              perror("fallimento fork");
+	              perror("Fallimento fork");
            else if (esito == 0) {
-	              execlp(comando,comando,NULL); // NOTA: non gestisce argomenti
+	              execlp(comando,comando,NULL); /* NOTA: non gestisce argomenti */
                       perror("Errore esecuzione:");
                       exit(EXIT_FAILURE);
            }
-           // il processo genitore (shell) torna immediatamente a leggere un altro comando
+           /* il processo shell torna immediatamente a leggere un altro comando */
    }
 }
