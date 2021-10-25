@@ -20,5 +20,6 @@ int main(){
                       exit(EXIT_FAILURE);
            }
            /* il processo shell torna immediatamente a leggere un altro comando */
+
    }
 }
