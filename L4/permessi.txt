@@ -1,0 +1,13 @@
+Permessi in Linux
+
+-rw-rw-r-- 1 brian brian    24391 Jun  6  2019 chase.gif
+-rw-rw-r-- 1 brian brian 19482956 Feb 10 21:52 linux.mp4
+drwxrwxr-x 2 brian brian     4096 Mar  8 13:01 pics
+                                               ^ file/directory name
+                                  ^ last modified date
+                         ^ size in bytes
+                   ^ group
+             ^ owner
+           ^ number of links
+ ^ permissions
+^ special designator
