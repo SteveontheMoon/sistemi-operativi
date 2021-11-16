@@ -1,0 +1,65 @@
+Esercizi sisop
+1) Richiesta: trovare i file dell'utente user che hanno numero di righe pari 
+   Soluzione: find / -type f -user user 2>/dev/null -print0 | xargs -I{} -0 wc -l {} 2>/dev/null | awk -F' ' '{if (($1 % 2) == 0){print $1, " ", $2}}'
+
+2) Richiesta: stampare le righe di un file composte da 5 caratteri esclusi gli spazi
+   Soluzione: cat <file> | sed -e 's/\s*//g'| awk -F'\n' '{if(length($1) == 5){print length($1), $1}}'
+
+3) Richiesta: stampare tutte le parole che contengono la lettera 'a' oppure 'A'
+   Soluzione: cat <file> | grep -i 'a'
+
+4) Richiesta: stampare il terzo carattere di tutte le stringhe presenti nel file
+   Soluzione: cat <file>  | awk '{print substr($1,3,1)}'
+
+5) Richiesta: stampare gli ultimi 2 caratteri di tutte le stringhe presenti nel file
+   Soluzione: cat <file>  | awk '{print substr($1,length($1)-1,2)}'
+
+6) Richiesta: stampare gli indirizzi ip presenti nei file del ramo /etc
+   Soluzione: find /etc -type f -print0 | xargs -I{} -0 grep -Eo ‘[0-9]{1,3}\ .[0-9]{1,3}\. [0-9]{1,3}\. [0-9]{1,3} ‘ {}
+
+7) Richiesta: creare un archivio contenente i file di dimensione minore di 50k
+   Soluzione 1: find /usr/bin -type f -size -50k | xargs -I{} tar -rvf archivio.tar {} 2> /dev/null
+   Soluzione 2: find /usr/bin -type f -size -50k | tar -cz -f archivio.tgz -T -
+   Aiuto 1: per vedere il contenuto di un archivio ---> tar -tvf archivio.tar 
+   Aiuto 2: per vedere il contenuto di un archivio ---> tar -ztvf archivio.tgz 
+
+8) Richiesta: ottenere il numero totale dei file contenuti nelle directory /usr/bin e /var
+   Soluzione: expr $(ls -Rl /var | grep ^- | wc -l) + $(ls -Rl /usr/bin | grep ^- | wc -l) 
+
+   Aiuto: Per verificare quale blocco della pipe fallisce --> echo ${PIPESTATUS[0]}  ${PIPESTATUS[1]}   ${PIPESTATUS[2]} ...
+
+Esercizi 2:
+1) Richiesta: trovare i file dell'utente user che hanno numero di righe pari 
+   Soluzione: find / -type f -user user 2>/dev/null -print0 | xargs -I{} -0 wc -l {} 2>/dev/null | awk -F' ' '{if (($1 % 2) == 0){print $1, " ", $2}}'
+
+2) Richiesta: stampare le righe di un file composte da 5 caratteri esclusi gli spazi
+   Soluzione: cat <file> | sed -e 's/\s*//g'| awk -F'\n' '{if(length($1) == 5){print length($1), $1}}'
+
+3) Richiesta: stampare tutte le parole che contengono la lettera 'a' oppure 'A'
+   Soluzione: cat <file> | grep -i 'a'
+
+4) Richiesta: stampare il terzo carattere di tutte le stringhe presenti nel file
+   Soluzione: cat <file>  | awk '{print substr($1,3,1)}'
+
+5) Richiesta: stampare gli ultimi 2 caratteri di tutte le stringhe presenti nel file
+   Soluzione: cat <file>  | awk '{print substr($1,length($1)-1,2)}'
+
+6) Richiesta: stampare gli indirizzi ip presenti nei file del ramo /etc
+   Soluzione: find /etc -type f -print0 | xargs -I{} -0 grep -Eo ‘[0-9]{1,3}\ .[0-9]{1,3}\. [0-9]{1,3}\. [0-9]{1,3} ‘ {}
+
+7) Richiesta: creare un archivio contenente i file di dimensione minore di 50k
+   Soluzione 1: find /usr/bin -type f -size -50k | xargs -I{} tar -rvf archivio.tar {} 2> /dev/null
+   Soluzione 2: find /usr/bin -type f -size -50k | tar -cz -f archivio.tgz -T -
+
+   Aiuto 1: per vedere il contenuto di un archivio ---> tar -tvf archivio.tar 
+   Aiuto 2: per vedere il contenuto di un archivio ---> tar -ztvf archivio.tgz 
+
+8) Richiesta: ottenere il numero totale dei file contenuti nelle directory /usr/bin e /var
+   Soluzione: expr $(ls -Rl /var | grep ^- | wc -l) + $(ls -Rl /usr/bin | grep ^- | wc -l) 
+
+
+9) Richiesta: Trovare tutti i file .h che hanno inode pari e numero di linee dispari
+   Soluzione: find /usr/include/ -maxdepth 1 -type f -name '*.h' -print0 | xargs -0 -I{} ls -i {} | awk '{if($1%2 ==0){print $2}}' | xargs -I{} wc -l {} 2>/dev/null | awk '{if($1%2 !=0){print $2}}'
+
+   Aiuto: Per verificare quale blocco della pipe fallisce --> echo ${PIPESTATUS[0]}  ${PIPESTATUS[1]}   ${PIPESTATUS[2]} ...
+EOF
