@@ -79,9 +79,14 @@ tar -rvf <archivename>.tar <filename>
 -F		extra full format
 
 
+# Dissasemblare codice oggett
+objdump -d p a.out
 
-
-
+# Dissasemblare con gdb
+```bash
+gdb a.out
+> disassemble 
+```
 
 
 

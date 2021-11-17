@@ -7,5 +7,3 @@ find ~/Documents/ -type f -print0 | xargs -0 du -sbh | sort -rh | head -1
 #du -sbh : 's' per 'summarize', 'b' [..], 'h' per 'human readable'.
 #sort -rh : 'rh' per riordinare in reverso numeri 'umani' passati in input
 #head -1 : mostra una sola riga.
-
-# Ma che sbatti mi sono fatto?

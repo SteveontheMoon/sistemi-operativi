@@ -1,6 +1,11 @@
 # VIM
-Attenzione: non contiene tutti i comandi necessari per poterlo usare ma solo i comandi che **io** non mi ricordo!
-In ogni caso puo' essere utile per gli altri.
+
+## .vimrc
+set number
+syntax on
+set tabstop=4
+set colorcolumn=120
+
 
 ## Move to <n> line
 | keyboard | command |

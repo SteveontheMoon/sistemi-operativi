@@ -1,0 +1,198 @@
+1) Scrivere uno script che controlli se esiste nella directory /bin un file che si chiama: dog, cat o fish, scrivendo “Trovato: ” e il nome del file. (hint: usare un ciclo for e
+ls)
+
+for i in cat dog fish; do if ls /bin/$i 2>/dev/null 1>/dev/null; then echo "Trovato /bin/$i"; fi; done
+
+
+2) Ripetere il primo esercizio facendo uso di test
+
+for i in cat dog fish; do if test -e /bin/$i; then echo "Trovato /bin/$i"; fi; done
+
+
+3) Scrivere una pipeline di comandi che identifichi il solo processo con il PPID piú alto (ps, sort, tail)
+
+ps -ef | sort -k3 -n | tail -n1
+
+
+4) Ottenere il numero totale dei file contenuti nelle directory /usr/bin e /var (ls, wc, expr)
+
+expr $(ls /usr/bin | wc -w) + $(ls /var | wc -w) => errato
+expr $(sudo find /var -type f| wc -w) + $(find /usr/bin -type f | wc -w)
+oppure
+j=0; k=0; for a in $(find /usr/bin -type f 2>/dev/null); do j=$(expr $j + 1); done; for b in $(find /var -type f 2>/dev/null); do k=$(expr $k + 1); done; echo $(expr $j + $k)
+oppure
+j=0; for i in $(find /usr/bin -type f 2>/dev/null); do j=$(expr $j + 1); done; for i in $(sudo /var find -type f 2>/dev/null); do j=$(expr $j + 1);done; echo $j
+
+
+5) Si immagini di avere un file contenente il sorgente di un programma scritto in un linguaggio di programmazione in cui i commenti occupino intere righe che iniziano con il carattere #. Scrivere una serie di comandi per ottenere il programma senza commenti. (grep)
+
+cat prova | grep -v "#"
+
+
+6) Ottenere la somma delle occupazioni dei file delle directory /usr/bin e /var (du, cut)
+
+sum=0; for i in $(find /usr/bin -type f); do sum=$(expr $sum + $(du $i | cut -f1)); done; for i in $(sudo find /var -type f); do sum=$(expr $sum + $(sudo du $i | cut -f1)); done; echo $sum"K"
+
+
+ 7) Trovare il file piú “grosso” in un certo ramo
+ 
+ find / -type f -print0 2>/dev/null | xargs -0 -I{} du {} 2>/dev/null | sort -n -k1 | tail -n 1
+ oppure
+ find /usr/bin/ -type f -printf "%f %s\n" | sort -nk2 | tail -1
+ oppure
+ find /home/gabriel -type f -printf "%p\t%s\n" 2>/dev/null | sort -k2n | tail -n1
+ oppure
+ find /usr/bin/ -type f -exec du {} + | sort -nk1 | tail -1
+
+8) Copiare alcuni file (ad es. il cui nome segue un certo pattern) di un ramo in un altro mantenendo la gerarchia delle directory
+
+find prima/ -type f | while read x; do mkdir -p dopo/$(dirname $x); cp $x dopo/$x ;done
+oppure
+find ./prima/ -type f | while read x; do mkdir -p copia/$(dirname $x); cp $x copia/$x; done
+
+
+9) Calcolare lo spazio occupato dai file di proprietà di un certo utente
+
+somma=0; for i in $(find / -type f -user gabriel -print0 2>/dev/null | xargs -0 -I{} du {} 2>/dev/null | cut -f1); do somma=$(expr $somma + $i); done; echo $somma
+oppure
+USER_NOW=$(whoami); result=0; for i in $( find -type f -user $USER_NOW -exec du {} \;| cut -f1 | xargs ); do result=$(($result + $i)) ; done ; echo $result
+(si può anche non usare | xargs)
+oppure
+somma=0; for i in $(find / -type f -user gabriel -printf "%p\t%s\n" 2>/dev/null | cut -f2); do somma=$(expr $somma + $i); done; echo $somma
+
+
+10) Scrivere un comando che conta quanti file ci sono in un determinato ramo del filesystem
+
+x=0; for i in $(find / -type f 2>/dev/null); do x=$(expr $x + 1); done; echo $x => SBAGLIATO PERCHÈ SE CI SONO FILE CON IL CONTEGGIO È ERRATO
+ESEMPIO: file con spazi => viene contato nel for come 3 file separati
+METODO CORRETTO:
+find / -type f | wc -l
+
+
+11) Creare un archivio tar.gz contenente tutti i file la cui dimensione è minore di 50KB
+
+for i in $(find -type f -size -5k); do tar -rvf archivio.tar $i; done
+oppure
+find . -type f -size -50k -exec tar -rvf archivio.tar.gz {} + (più veloce del for)
+
+
+12) Rinominare un certo numero di file: per esempio tutti i file .png in .jpg
+
+ls | egrep "*.png" | while read x; do mv $x ${x/%.png/.jpg}; done
+
+
+13) Creare un file da 10MB costituito da caratteri casuali (usando /dev/random) e verificare se contiene la parola JOS
+
+FILENAME=test.dat; dd if=/dev/random of=$FILENAME bs=1024 count=10240 && cat $FILENAME | if grep "JOS"; then echo OK; else echo NO; fi;
+
+
+14) Trovare l’utente che ha il maggior numero di file nel sistema
+
+for utente in $(cat /etc/passwd | cut -d: -f1); do echo "$utente $(find /unimi -type f -user $utente 2>/dev/null | wc -l)"; done | sort -nk2 | tail -n1
+
+
+15) Trovare i 3 utenti che, sommando la dimensione dei loro file, occupano piú spazio nel sistema.
+
+for utente in $(cat /etc/passwd | cut -d: -f1); do somma=0; for i in $(find / -type f -user $utente -print0 2>/dev/null | xargs -0 -I{} du {} | cut -f1); do somma=$(expr $somma + $i); done; echo "$utente $somma"; done | sort -nk2 | tail -n3
+
+
+16) Trovare tutte i file di 2 3 4 o 5 caratteri compresa estesione e contarli
+
+find /usr/ -type f -printf "%f\n" | (while read f; do l=${#f}; if (($l >= 2)) && (($l<=5)); then echo $f; fi; done;) | wc -l
+find /usr -type f -printf "%f\n" | egrep "^.{2,5}$"
+
+
+17) Trovare la somma delle dimensioni dei file dell'utente con il maggior numero di file
+
+somma=0; for x in $(find /etc -type f -user $(for utente in $(cat /etc/passwd | cut -d: -f1); do echo "$utente $(find / -type f -user $utente -printf "%f\n" 2>/dev/null | wc -l)"; done | sort -nk2 | tail -n1 | cut -f1 -d " ") -print0 2>/dev/null | xargs -0 -I{} du -b {} | cut -f1); do somma=$(expr $somma + $x); done; echo $somma
+oppure
+for utente in $(cat /etc/passwd | cut -d: -f1); do sum=0; space=0; for f in $(find /usr -type f -user $utente 2>/dev/null); do sum=$(expr $sum  + 1); space=$(expr $space + $(du $f | cut -f1) ); done; echo $utente $sum $space"K"; done | sort -nk2 | tail -1 | cut -d ' ' -f1,3
+
+18) Contare l'occorrenza delle parole in un file e ordinarle in ordine inverso
+
+egrep -o "[[:alpha:]]+" prova | sort | uniq -c | sort -nr
+oppure
+egrep -o "[A-Za-z]+" prova | sort |uniq -c| sort -nrk1
+oppure
+egrep -o "\w+" prova | sort |uniq -c| sort -nrk1
+oppure
+for w in $(cat prova);do count=0; for i in $(cat prova); do if [ "$w" =  "$i" ]; then count=$(expr $count + 1);fi; done; echo $w":" $count; done | sort -nrk2 | uniq
+
+
+19) Trovare la parola con il maggior numero di occorrenze in un file
+
+egrep -o "[[:alpha:]]+" prova | sort | uniq -c | sort -nk1 | tail -n1
+
+
+20) Parole con occorrenze più alte nei file in /usr/include che iniziano con s e finiscono con h
+
+find /usr/include -type f -name "s*.h" -print0 | xargs -0 -I{} egrep -o "[[:alpha:]]+" {} | sort | uniq -c | sort -n | tail -n3
+oppure
+find /usr/include -type f -name "s*.h" | while read x; do egrep -o "[[:alpha:]]+" $x; done | sort | uniq -c | sort -n | tail -n3
+
+21) Parole con occorrenze più alte nei file in /usr/include che iniziano con s e finiscono con h e che pesano meno di 1,5k
+
+find /usr/include -type f -size -1536c -print0 | xargs -0 -I{} egrep -o "[[:alpha:]]+" {} | sort | uniq -c | sort -k1n | tail -n3
+
+22) Parole con occorrenze più alte nei file in /usr/include che finiscono con h e che pesano meno di 1,5k e sono stati modificati meno di due settimane fa
+
+find /home/gabriel -type f -name "*.txt" -size -1536c -mtime -14 | while read x; do egrep -o "[[:alpha:]]+" $x 2>/dev/null; done | sort | uniq -c | sort -k1n | tail -n3
+
+
+23) File contenuti in /usr/include che iniziano per s e finiscono con h, che contengono la parola "the"
+
+find /usr/include -type f -name "s*.h" | while read x; do egrep -wl "the" $x; done
+
+
+24) Calcola quante volte appare la parola DEFINE e INCLUDE nel totale dei file .c e .h
+
+find /home -type f -name "*.[ch]" -print0 | xargs -0 -I{} cat {} | grep -oe define -oe include | sort | uniq -c
+
+
+25) Calcolare quanti sono gli utenti con numero di file > 0
+
+count=0; for utente in $(cat /etc/passwd | cut -d: -f1); do if(($(find -type f -user $utente | wc -l) > 0 )); then count=$(expr $count + 1); fi; done; echo $count
+
+
+26) Contare quanti file sono stati modificati di venerdì in una certa directory
+
+find . -type f -printf "%p %t\n" | grep Fri | wc -l
+
+
+27) Mostrare quali file sono stati modificati di venerdì in una certa directory
+
+find unimi/ -type f -printf "%f\t%t\n" | grep Fri | cut -f1
+
+
+28) Mostrare quali file contengono la parola JOS
+
+find unimi/ -type f -print0 | xargs -0 -I {} grep -l JOS {}
+
+
+29) Sommare il peso di tutte le occorrenze di tutti i file minori di 50k e modificati l'ultima volta di venerdì
+
+somma=0; for i in $(find /usr/bin -type f -size -50k -printf "%p\t%s\t%t\n" | grep Fri | cut -f2); do somma=$(expr $somma + $i); done; echo $somma
+
+
+30) Calcolare la somma dei file dell'utente con il nome più lungo
+man see
+somma=0; user=$(for user in $(cat /etc/passwd | cut -d: -f1); do echo "${#user} $user" ; done | sort -k1n | tail -1 | cut -d " " -f2); somma=0; for i in $(find -type f -user $user -printf "%s\n" 2>/dev/null); do somma=$(expr $somma + $i); done; echo $somma
+oppure
+utente=$(for i in $(cat /etc/passwd| cut -d ':' -f1);do echo $i ${#i}; done | sort -nk2 | tail -1 | cut -d ' ' -f1); somma=0; for i in $(find -type f -user $user  -printf "%s "); do somma=$(($somma + $i));done;echo $somma
+
+
+31) Trova l'occupazione totale di tutti i file che contengono sia include che define
+
+somma=0;for i in $(find -type f -print0 | xargs -0 -I{} egrep -l "include" {} | xargs -I{} egrep -l "define" {} | xargs -I {} du {} | cut -f1); do somma=$(( $somma + $i));done;echo $somma
+
+
+31) Trova tutti i file -5k modificati di mercoledi
+
+find -type f -size -5k -printf "%t %f\n" | egrep "Wed" | cut -d ' ' -f6 
+
+
+32) Stampa gli utenti che hanno più di 10 file
+
+for i in $(cat /etc/passwd | cut -d ':' -f1); do tot=$(find -type f -user $i | wc -l); if(($tot>10));then echo $i; fi; done
+
+33) user=$(for user in $(ps -aux | tr -s " " | cut -d " " -f1 | sort | uniq); do echo ${#user} $user; done | sort -k1n | tail -1 | cut -d " " -f2); ps -aux | grep "^$user" | sort -k2nr | tail -1
